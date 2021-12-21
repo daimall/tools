@@ -159,24 +159,24 @@ func (c *FlowController) GetAll() {
 	var sortby []string
 	var order []string
 	var query []*common.QueryConditon
-	var limit int64 = 10
-	var offset int64
+	var limit int = 10
+	var offset int
 	// fields: col1,col2,entity.col3
 	if v := c.GetString("fields"); v != "" {
 		fields = strings.Split(v, ",")
 	}
 	// limit: 10 (default is 10)
-	if v, err := c.GetInt64("limit"); err == nil {
+	if v, err := c.GetInt("limit"); err == nil {
 		limit = v
 	}
 	// offset: 0 (default is 0)
-	if v, err := c.GetInt64("offset"); err == nil {
+	if v, err := c.GetInt("offset"); err == nil {
 		offset = v
 	}
 	// 适配amis
-	if v, err := c.GetInt64("perPage"); err == nil {
+	if v, err := c.GetInt("perPage"); err == nil {
 		limit = v
-		if v, err := c.GetInt64("page"); err == nil {
+		if v, err := c.GetInt("page"); err == nil {
 			offset = (v - 1) * limit
 		}
 	}

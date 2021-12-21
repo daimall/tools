@@ -71,8 +71,8 @@ type GetOneInf interface {
 type GetAllInf interface {
 	// 获取所有流程
 	GetAll(uname string, query []*common.QueryConditon, fields []string,
-		sortby []string, order []string, offset int64,
-		limit int64) (ret interface{}, count int64, oplog string, err error)
+		sortby []string, order []string, offset int,
+		limit int) (ret interface{}, count int64, oplog string, err error)
 }
 
 type UpdateInf interface {

@@ -9,7 +9,7 @@ import (
 
 	"github.com/astaxie/beego/logs"
 	"github.com/daimall/tools/curd/common"
-	dbgorm "github.com/daimall/tools/curd/dbmysql/dbgorm/mysql"
+	"github.com/daimall/tools/curd/dbmysql/dbgorm"
 	oplog "github.com/daimall/tools/curd/oplog"
 	"gorm.io/gorm"
 )

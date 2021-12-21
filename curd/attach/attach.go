@@ -15,7 +15,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/daimall/tools/curd/common"
-	dbgorm "github.com/daimall/tools/curd/dbmysql/dbgorm/mysql"
+	"github.com/daimall/tools/curd/dbmysql/dbgorm"
 	"github.com/daimall/tools/tusclient"
 	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"

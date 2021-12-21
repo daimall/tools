@@ -7,7 +7,7 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/daimall/tools/curd/common"
 	"github.com/daimall/tools/curd/customerror"
-	dbgorm "github.com/daimall/tools/curd/dbmysql/dbgorm/mysql"
+	"github.com/daimall/tools/curd/dbmysql/dbgorm"
 	"github.com/daimall/tools/curd/flow/v1/flowservice"
 	oplog "github.com/daimall/tools/curd/oplog"
 )

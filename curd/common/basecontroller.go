@@ -19,14 +19,11 @@ func init() {
 	validate = validator.New()
 }
 
-const ControllerKindJSON string = "JSON"
-
 //BaseController ...
 //所有控制controller的基础struct
 type BaseController struct {
 	REST             StandRestResultInf
-	Kind             string // 类型 JSON 或非 JSON
-	beego.Controller        // beego 基础控制器
+	beego.Controller // beego 基础控制器
 }
 
 func (b *BaseController) GetStandRestResult() StandRestResultInf {
@@ -37,9 +34,13 @@ func (b *BaseController) GetStandRestResult() StandRestResultInf {
 }
 
 // JSONResponse 返回JSON格式结果
-func (c *BaseController) JSONResponse(err customerror.CustomError, data ...interface{}) {
+func (c *BaseController) JSONResponse(err error, data ...interface{}) {
 	if err != nil {
-		c.Data["json"] = c.GetStandRestResult().GetStandRestResult(err.GetCode(), err.GetMessage(), nil)
+		if cuserr, ok := err.(customerror.CustomError); ok {
+			c.Data["json"] = c.GetStandRestResult().GetStandRestResult(cuserr.GetCode(), cuserr.GetMessage(), nil)
+		} else {
+			c.Data["json"] = c.GetStandRestResult().GetStandRestResult(-1, err.Error(), nil)
+		}
 		logs.Error("JSONResponse:", err.Error())
 	} else {
 		if len(data) == 1 {
