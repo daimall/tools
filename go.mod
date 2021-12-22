@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/astaxie/beego v1.12.3
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ldap/ldap/v3 v3.4.1
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-redis/redis v6.15.9+incompatible
