@@ -37,7 +37,7 @@ var (
 	//OauthCodeExpire accesstoken过期
 	OauthCodeExpire = customerror.New(3000, "Oauth Code Expire")
 	//AuthAccessTokenExpire auth令牌过期
-	AuthAccessTokenExpire = customerror.New(3001, "Oauth AccessToken Error or Expire")
+	AuthAccessTokenExpire = customerror.New(50014, "Oauth AccessToken Error or Expire")
 	//AuthRefreshTokenExpire 刷新令牌过期
 	AuthRefreshTokenExpire = customerror.New(3011, "Oauth RefreshToken Error or Expire")
 	//GetCodeFrequently 请求验证码次数过多
@@ -76,4 +76,10 @@ var (
 	UploadErr            = customerror.New(1005, "上传文件失败")
 	UpdateActionNotFound = customerror.New(1006, "Update Acton 不存在")
 	ActionNotFound       = customerror.New(1007, "Action 不存在")
+)
+
+var (
+	TokenInvalid       = customerror.New(50008, "非法的token")
+	AnotherClientLogin = customerror.New(50012, "其他客户端登录了")
+	// AccessTokenExpire         = customerror.New(50014, "Token 过期了")
 )
