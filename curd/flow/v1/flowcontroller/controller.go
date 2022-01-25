@@ -117,7 +117,7 @@ func (c *FlowController) GetOne() {
 		return
 	}
 	if getOneApp, ok := c.Service.(flowservice.GetOneInf); ok {
-		getOneApp.GetOne(c.uname, serviceId)
+		ret, oplog, err = getOneApp.GetOne(c.uname, serviceId)
 		return
 	}
 	err = fmt.Errorf("GetOne interface not implement")
