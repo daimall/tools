@@ -4,12 +4,14 @@ import (
 	"runtime"
 	"strconv"
 
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/daimall/tools/curd/common"
 	"github.com/daimall/tools/curd/customerror"
 	"github.com/daimall/tools/curd/dbmysql/dbgorm"
 	"github.com/daimall/tools/curd/flow/v1/flowservice"
 	oplog "github.com/daimall/tools/curd/oplog"
+	"github.com/daimall/tools/functions"
 )
 
 // 继承公共基础
@@ -39,13 +41,28 @@ func (c *BaseController) LogFunc(serviceId uint, action, log string) {
 
 // 预执行，获取service对象
 func (c *BaseController) Prepare() {
-	var ok bool
-	if c.uname, ok = c.GetSession(common.UserNameSessionKey).(string); ok {
+	var PrepareFunc = func() {
 		c.ServiceName = c.Ctx.Input.Param(":service")
 		c.Service = flowservice.GetService(c.ServiceName)
 		if app, ok := c.Service.(flowservice.SetBaseControllerInf); ok {
 			app.SetBaseController(c.BaseController)
 		}
+	}
+	var ok bool
+	// session 存储用户名模式
+	if c.uname, ok = c.GetSession(common.UserNameSessionKey).(string); ok {
+		PrepareFunc()
+		return
+	}
+	// 兼容token 模式（从token中解析出用户名）
+	var err error
+	if c.uname, err = functions.GetAccountIdFromToken(c.Ctx.Input.Header(common.TokenKey), []byte("test_group")); err == nil {
+		PrepareFunc()
+		return
+	}
+	if beego.BConfig.RunMode == beego.DEV {
+		c.uname = beego.AppConfig.DefaultString("defaultUname", "dev")
+		PrepareFunc()
 		return
 	}
 	logs.Error("username[KEY:%s] does not exist in session.", common.UserNameSessionKey)

@@ -15,8 +15,8 @@ type CommStep struct {
 	HandlersInFlowAttr string       // handers 默认存储到flow到那个属性中
 	Configs            []ConfigPage // 处理该步骤需要对参数对象
 	LoadConfig         func(flow FlowService) []ConfigPage
-	LoadJSONConfig     func(flow FlowService) interface{}                       // json生成的map嵌套对象
-	CancelDo           func(tx *gorm.DB, flowId int64, flow string) (err error) // 返回当前部署时，清空数据
+	LoadJSONConfig     func(flow FlowService) interface{}                      // json生成的map嵌套对象
+	CancelDo           func(tx *gorm.DB, flowId uint, flow string) (err error) // 返回当前部署时，清空数据
 }
 
 func (s *CommStep) Key() (stepKey string) {
@@ -56,13 +56,13 @@ func (s *CommStep) AddHandlers(tx *gorm.DB, handlers []FlowHandler) (err error) 
 }
 
 // 删除当前步骤和上一步的处理记录
-func (s *CommStep) ClearHandlers(tx *gorm.DB, flowId int64, flow string, steps []string, remainingIds []int64) (err error) {
+func (s *CommStep) ClearHandlers(tx *gorm.DB, flowId uint, flow string, steps []string, remainingIds []uint) (err error) {
 	if len(remainingIds) > 0 {
 		tx = tx.Where("(step = ? and service_id = ? and service = ?) or id in (?)", steps[0], flowId, flow, remainingIds)
 	} else {
 		tx = tx.Where("step in (?) and service_id = ? and service = ? ", steps, flowId, flow)
 	}
-	if err = tx.Delete(s.Handler).Error; err != nil {
+	if err = tx.Table(s.Hander().TableName()).Delete(s.Handler).Error; err != nil {
 		logs.Error("clear handlers failed,", err.Error())
 		return
 	}

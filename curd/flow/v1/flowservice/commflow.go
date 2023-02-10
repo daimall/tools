@@ -16,7 +16,7 @@ import (
 
 // 流程公共属性
 type CommFlow struct {
-	ID      int64  `gorm:"primary_key"  json:"id"`                         // 自增主键
+	ID      uint   `gorm:"primary_key" json:"id"`                          // 自增主键
 	CurStep string `gorm:"size:20;column:cur_step;index"  json:"cur_step"` // 当前步骤
 	State   int    `gorm:"column:state;index"  json:"state"`               // 状态 1: 流程草稿   2: 流程流转中  3： 流程完成  4: 流程完成（被拒绝）， 5: 流程完成（超时）
 	Creator string `gorm:"size:100;column:creator;index"  json:"creator"`  // 创建人
@@ -28,8 +28,13 @@ type CommFlow struct {
 }
 
 // 获取ID
-func (f *CommFlow) GetID() int64 {
+func (f *CommFlow) GetID() uint {
 	return f.ID
+}
+
+// 获取flowname
+func (s *CommFlow) GetFlowName() string {
+	return ""
 }
 
 // 获取某个属性值（供step跳转使用）
@@ -130,7 +135,7 @@ func (x *CommFlow) GoNext(tx *gorm.DB, flow FlowService, tblName, serviceName st
 	}
 	if next == nil {
 		// 最后一步
-		if err = tx.Model(flow).Updates(&CommFlow{CurStep: "-", State: FlowStateFinish}).Error; err != nil {
+		if err = tx.Model(flow).Updates(map[string]interface{}{"cur_step": "-", "state": FlowStateFinish}).Error; err != nil {
 			logs.Error("update supplier flow to finish failed,", err.Error())
 			return
 		}
@@ -169,7 +174,7 @@ func (x *CommFlow) GoNext(tx *gorm.DB, flow FlowService, tblName, serviceName st
 			}
 		}
 		// 进入下一步
-		if err = tx.Model(flow).Updates(&CommFlow{CurStep: next.Key()}).Error; err != nil {
+		if err = tx.Model(flow).Update("cur_step", next.Key()).Error; err != nil {
 			logs.Error("update supplier flow to next step failed,", err.Error())
 			return
 		}

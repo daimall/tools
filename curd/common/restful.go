@@ -7,6 +7,13 @@ type StandRestResult struct {
 	Data    interface{} `json:"data"`    // 数据体
 }
 
+// RestResult Rest接口返回值(兼容特性使用)
+type RestResult struct {
+	Code    int         // 0 表示成功，其他失败
+	Message string      // 错误信息
+	Data    interface{} // 数据体
+}
+
 func (rest StandRestResult) GetStandRestResult(code int, msg string, data interface{}) interface{} {
 	return StandRestResult{Code: code, Message: msg, Data: data}
 }

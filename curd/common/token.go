@@ -1,7 +1,7 @@
 package common
 
 const (
-	TokenKey           = "X-Token"
+	TokenKey           = "Authorization"
 	UserNameSessionKey = "X-UserName"
 	CodeKey            = "X-Code"
 	AppTag             = "APPID"

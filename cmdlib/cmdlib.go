@@ -171,14 +171,14 @@ func RunShellCommandString(cmdStr []string) (out string, err error) {
 	return "", err
 }
 
-//同步执行操作系统命令的方法（获取命令返回值）
-//RunShellCommandString 执行shell命令，返回[]byte
+// 同步执行操作系统命令的方法（获取命令返回值）
+// RunShellCommandString 执行shell命令，返回[]byte（包含stderr 和 stdout）
 func RunShellCommandBytes(cmdStr []string) (out []byte, err error) {
 	cmd := exec.Command(cmdStr[0], cmdStr[1:]...)
-	if out, err = cmd.Output(); err == nil {
+	if out, err = cmd.CombinedOutput(); err == nil {
 		// out = bytes.TrimSpace(out)
 		return out, nil
 	}
 	logs.Error("run shell command[%s] failed, %s", cmdStr, err.Error())
-	return nil, err
+	return out, err
 }

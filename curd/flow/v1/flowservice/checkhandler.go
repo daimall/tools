@@ -22,22 +22,23 @@ type CheckHandler struct {
 	Conclusion  int    `gorm:"column:conclusion"  json:"conclusion"`                          // 评审结论,0未评审，1 通过，2 风险通过 3 拒绝, 100 转他人处理
 	Remark      string `gorm:"column:remark"  json:"remark"`                                  // 操作详情
 	//Attach      string      `gorm:"size:1000;column:attach;index"  json:"attach"` // 附件
-	CreatedAt  time.Time   `json:"created_at"` // 创建时间
-	UpdatedAt  time.Time   `json:"updated_at"` // 最后更新时间
-	TblName    string      `gorm:"-" json:"-"` // 表名
-	Flow       FlowService `gorm:"-" json:"-"` // 关联的流程
-	AttachKeys []string    `gorm:"-" json:"-"` // 附件key列表
+	CreatedAt     time.Time   `json:"created_at"` // 创建时间
+	UpdatedAt     time.Time   `json:"updated_at"` // 最后更新时间
+	TblName       string      `gorm:"-" json:"-"` // 表名
+	Flow          FlowService `gorm:"-" json:"-"` // 关联的流程
+	AttachKeys    []string    `gorm:"-" json:"-"` // 附件key列表
+	IsPublicCheck bool        `gorm:"-" json:"-"` // 是否为公共审核，如果是不需要鉴权
 
 	Pretreatment   func(uname string, tx *gorm.DB, c common.BaseController, h *CheckHandler) (oplog string, err error)                        `gorm:"-" json:"-"` // 预处理
 	Aftertreatment func(uname string, tx *gorm.DB, c common.BaseController, h *CheckHandler, handers []FlowHandler) (oplog string, err error) `gorm:"-" json:"-"` // 后处理
 	// Attachs []attach.Attach `gorm:"-" json:"attachs"` // 附件列表
 
-	PreStepHandlerIds []int64 `gorm:"-" json:"preStepHandlerIds"` // 上一步需要重新审批的用户
+	PreStepHandlerIds []uint `gorm:"-" json:"preStepHandlerIds"` // 上一步需要重新审批的用户
 }
 
 func (h *CheckHandler) Do(uname string, c common.BaseController) (ret interface{}, oplog string, err error) {
 	if beego.AppConfig.DefaultBool("needlogin", true) {
-		if h.User != uname {
+		if h.IsPublicCheck == false && h.User != uname {
 			err = fmt.Errorf("you[%s] have no permission", uname)
 			logs.Error(err.Error())
 			return
@@ -77,10 +78,11 @@ func (h *CheckHandler) Do(uname string, c common.BaseController) (ret interface{
 	if checkHandler.Conclusion == ConCLusionTransferOther {
 		// 转给他人处理
 		h.User = checkHandler.User
-		if err = tx.Model(h).Updates(h).Error; err != nil {
+		if err = tx.Model(h).Table(h.TableName()).Updates(h).Error; err != nil {
 			logs.Error("update step user error %s", err.Error())
 			return
 		}
+		ret = fmt.Sprintf("%s transfer to %s", h.Step, checkHandler.User)
 		return
 	}
 	var attachs []attach.Attach
@@ -104,7 +106,7 @@ func (h *CheckHandler) Do(uname string, c common.BaseController) (ret interface{
 			return
 		}
 	}
-	if err = tx.Model(h).Updates(h).Error; err != nil {
+	if err = tx.Table(h.TableName()).Where("id = ?", h.ID).Updates(h).Error; err != nil {
 		logs.Error("update step conclusion error %s", err.Error())
 		return
 	}
@@ -150,7 +152,7 @@ func (h *CheckHandler) LoadInst(flow FlowService, uname string, id uint) (ret Fl
 		handler.Step = step.Key()
 	}
 	dbInst := dbgorm.GetDBInst()
-	if err = dbInst.Where(handler).First(handler).Error; err != nil {
+	if err = dbInst.Table(h.TableName()).Where(handler).First(handler).Error; err != nil {
 		logs.Error("get handler failed,", err.Error(), handler)
 		return
 	}
@@ -161,6 +163,7 @@ func (h *CheckHandler) LoadInst(flow FlowService, uname string, id uint) (ret Fl
 	handler.Aftertreatment = h.Aftertreatment
 	handler.Conclusion = h.Conclusion
 	handler.PreStepHandlerIds = h.PreStepHandlerIds
+	handler.IsPublicCheck = h.IsPublicCheck
 
 	return handler, nil
 }

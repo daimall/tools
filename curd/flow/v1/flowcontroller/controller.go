@@ -216,6 +216,9 @@ func (c *FlowController) GetAll() {
 				continue
 			}
 			vInit := v1[0]
+			if len(strings.TrimSpace(vInit)) == 0 {
+				continue
+			}
 			qcondtion := new(common.QueryConditon)
 			key_type := strings.Split(kInit, "|") // 解析key中的type信息
 			if len(key_type) == 2 {
@@ -333,6 +336,11 @@ func (c *FlowController) Delete() {
 		return
 	}
 	if deleteApp, ok := c.Service.(flowservice.DeleteInf); ok {
+		ret, oplog, err = deleteApp.Delete(serviceId, c.uname, c.BaseController.BaseController)
+		return
+	}
+	// 兼容老delete接口
+	if deleteApp, ok := c.Service.(flowservice.DeleteCompatible1Inf); ok {
 		ret, oplog, err = deleteApp.Delete(serviceId)
 		return
 	}
@@ -456,7 +464,7 @@ func (c *FlowController) Export() {
 		"page":     {},
 		"perPage":  {},
 	}
-	if beego.AppConfig.DefaultString("webKind", "AMIS") == "AMIS" {
+	if beego.AppConfig.DefaultString("webKind", "BS") == "AMIS" {
 		// query: k|type=v,v,v  k|type:v|v|v  其中Type可以没有,默认值是 MultiText
 		kv := c.Ctx.Request.URL.Query()
 		for kInit, v1 := range kv {

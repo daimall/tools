@@ -16,3 +16,12 @@ type QueryConditon struct {
 	QueryType   string // multi-select  multi-text  num-range  comma-multi-select
 	QueryValues []string
 }
+
+func QueryKeyReplace(query []*QueryConditon, repMap map[string]string) (ret []*QueryConditon) {
+	for i := range query {
+		if v, ok := repMap[query[i].QueryKey]; ok {
+			query[i].QueryKey = v
+		}
+	}
+	return query
+}

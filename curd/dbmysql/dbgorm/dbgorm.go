@@ -25,6 +25,14 @@ func GetDBInst() *gorm.DB {
 }
 
 func NewDBInst() *gorm.DB {
+	return newDBInst("DB")
+}
+
+func NewDBInstBySection(section string) *gorm.DB {
+	return newDBInst(section)
+}
+
+func newDBInst(section string) *gorm.DB {
 	var db *gorm.DB
 	var err error
 	newLogger := logger.New(
@@ -36,9 +44,9 @@ func NewDBInst() *gorm.DB {
 			Colorful:                  false,       // 禁用彩色打印
 		},
 	)
-	if beego.AppConfig.String("DB::Driver") == "mysql" {
-		passwd := beego.AppConfig.String("DB::Passwd")
-		if pwdEncryptKey := beego.AppConfig.String("DB::PwdEncryptKey"); pwdEncryptKey != "" {
+	if beego.AppConfig.String(section+"::Driver") == "mysql" {
+		passwd := beego.AppConfig.String(section + "::Passwd")
+		if pwdEncryptKey := beego.AppConfig.String(section + "::PwdEncryptKey"); pwdEncryptKey != "" {
 			// 密码是加密形态，需要解密
 			if passwd, err = cbc.New(pwdEncryptKey).Decrypt(passwd); err != nil {
 				logs.Error("Decrypt db passwd failed, pwdKey: %s, ciphertext: %s, err:%s",
@@ -46,7 +54,7 @@ func NewDBInst() *gorm.DB {
 				panic(err)
 			}
 		}
-		dsn := fmt.Sprintf(beego.AppConfig.String("DB::SourceName"), passwd)
+		dsn := fmt.Sprintf(beego.AppConfig.String(section+"::SourceName"), passwd)
 		if db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 			Logger: newLogger,
 		}); err != nil {
@@ -54,8 +62,8 @@ func NewDBInst() *gorm.DB {
 			panic(err)
 		}
 		return db
-	} else if beego.AppConfig.String("DB::Driver") == "sqlite3" {
-		dbfile := beego.AppConfig.String("DB::SourceName")
+	} else if beego.AppConfig.String(section+"::Driver") == "sqlite3" {
+		dbfile := beego.AppConfig.String(section + "::SourceName")
 		if db == nil {
 			if db, err = gorm.Open(sqlite.Dialector{DSN: dbfile, DriverName: "sqlite"}, &gorm.Config{
 				Logger: newLogger,

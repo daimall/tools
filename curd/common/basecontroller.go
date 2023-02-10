@@ -1,7 +1,11 @@
 package common
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"github.com/daimall/tools/aes"
+	"github.com/daimall/tools/aes/cbc"
 	"io"
 	"mime/multipart"
 	"os"
@@ -49,7 +53,7 @@ func (c *BaseController) JSONResponse(err error, data ...interface{}) {
 			c.Data["json"] = c.GetStandRestResult().GetStandRestResult(0, "OK", data)
 		}
 	}
-	c.ServeJSON()
+	c.ServeDecryptJSON()
 }
 
 //ValidateParameters obj must pointer, json Unmarshal object and require parameter validate
@@ -81,4 +85,56 @@ func (c *BaseController) SaveToFileCustomName(fromfile string, fc func(*multipar
 	defer f.Close()
 	io.Copy(f, file)
 	return nil
+}
+
+const (
+	ENCRYPT_TYPE                   = "EncryptType"       // 加密类型KEY
+	ENCRYPT_TYPE_AES_PRIV_REQ      = "AES_PRIV_REQ"      // 请求加密
+	ENCRYPT_TYPE_AES_PRIV_RESP     = "AES_PRIV_RESP"     // 响应加密
+	ENCRYPT_TYPE_AES_PRIV_REQ_RESP = "AES_PRIV_REQ_RESP" // 请求和响应都加密
+	ERR_CODE_ENCRYPT_FAILED        = 9001                // 加密响应body失败
+)
+
+// ServeSelfJSON ...
+// Controller 自定义方法，用来处理加密返回
+func (c *BaseController) ServeDecryptJSON() {
+	if c.Ctx.Input.Header(ENCRYPT_TYPE) == ENCRYPT_TYPE_AES_PRIV_RESP ||
+		c.Ctx.Input.Header(ENCRYPT_TYPE) == ENCRYPT_TYPE_AES_PRIV_REQ_RESP {
+		var err error
+		defer func() {
+			if err != nil {
+				c.Data["json"] = RestResult{Code: ERR_CODE_ENCRYPT_FAILED,
+					Message: "Encrypt response failed," + err.Error()}
+				c.ServeJSON()
+			}
+		}()
+		var origData []byte
+		var decryptedData []byte
+		if origData, err = json.Marshal(c.Data["json"]); err != nil {
+			logs.Error("marshal c.Data failed,", err.Error())
+			return
+		}
+		appid := c.Ctx.Input.Header("BsAppID")
+		model := c.Ctx.Input.Header("Model")
+		timestamp := c.Ctx.Input.Header("Timestamp")
+		if len(appid) < 10 || len(timestamp) < 10 {
+			err = fmt.Errorf("appid[%s] or timestamp[%s] invalid", appid, timestamp)
+			logs.Error(err.Error())
+			return
+		}
+		aesKey := aes.GetPriAesKey(appid, model, timestamp)
+		if decryptedData, err = cbc.NewPri(aesKey).EncryptBytes(origData); err != nil {
+			logs.Error("encrypt response body failed,", err.Error())
+			return
+		}
+		decryptedBytes := make([]byte, base64.StdEncoding.EncodedLen(len(decryptedData)))
+		base64.StdEncoding.Encode(decryptedBytes, decryptedData)
+		c.Ctx.Output.Header("Content-Type", "application/json; charset=utf-8")
+		if err = c.Ctx.Output.Body(decryptedBytes); err != nil {
+			logs.Error("set response body failed", err.Error())
+			return
+		}
+	} else {
+		c.ServeJSON()
+	}
 }

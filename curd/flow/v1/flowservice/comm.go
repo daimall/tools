@@ -147,12 +147,7 @@ func (c *CommFlow) BaseQuery(dbInst *gorm.DB, crudModel interface{}, querys []*c
 		} else if len(sortby) != len(order) && len(order) != 1 {
 			return nil, errors.New("error: 'sortby', 'order' sizes mismatch or 'order' size is not 1")
 		}
-	} else {
-		if len(order) != 0 {
-			return nil, errors.New("error: unused 'order' fields")
-		}
 	}
-
 	return g, nil
 }
 

@@ -81,9 +81,15 @@ type UpdateInf interface {
 
 }
 
-type DeleteInf interface {
+// 兼容老接口
+type DeleteCompatible1Inf interface {
 	// 删除一个对象
 	Delete(uint) (ret interface{}, oplog string, err error)
+}
+
+type DeleteInf interface {
+	// 删除一个对象
+	Delete(flowId uint, uname string, c common.BaseController) (ret interface{}, oplog string, err error)
 }
 type MultiDeleteInf interface {
 	// 删除多个对象
@@ -135,7 +141,7 @@ type GetConfigsInf interface {
 
 type GoNextInf interface {
 	// 流程步骤（下一步/上一步）， remainingIds：上一步需要重新处理的，默认全部需要
-	GoNext(tx *gorm.DB, remainingIds []int64) (handlers []FlowHandler, err error)
+	GoNext(tx *gorm.DB, remainingIds []uint) (handlers []FlowHandler, err error)
 }
 type GetCurStepInf interface {
 	// 获取当前步骤
