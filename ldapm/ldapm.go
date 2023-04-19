@@ -23,7 +23,7 @@ type ldapAdapter struct {
 var once sync.Once
 var ins *ldapAdapter
 
-//初始化实例
+// 初始化实例
 func New() *ldapAdapter {
 	once.Do(func() {
 		ins = new(ldapAdapter)
@@ -31,27 +31,27 @@ func New() *ldapAdapter {
 	return ins
 }
 
-//设置ldap ip和端口
+// 设置ldap ip和端口
 func (l *ldapAdapter) SetAddress(ip string, port int) *ldapAdapter {
 	l.IP = ip
 	l.Port = port
 	return l
 }
 
-//设置ldap rootdn
+// 设置ldap rootdn
 func (la *ldapAdapter) SetRootDN(rootdn string) *ldapAdapter {
 	la.RootDN = rootdn
 	return la
 }
 
-//设置ldap 登录账号
+// 设置ldap 登录账号
 func (la *ldapAdapter) SetAccount(user, passwd string) *ldapAdapter {
 	la.User = user
 	la.Passwd = passwd
 	return la
 }
 
-//从配置文件中读取参数
+// 从配置文件中读取参数
 func (la *ldapAdapter) LoadBeegoConf() *ldapAdapter {
 	la.IP = beego.AppConfig.String("LDAP::ADDR")
 	la.Port, _ = beego.AppConfig.Int("LDAP::PORT")
@@ -101,7 +101,7 @@ func (la *ldapAdapter) GetUserInfo(account string, f func(*ldap.Entry) (interfac
 	return f(sr.Entries[0])
 }
 
-//ValidateUser 校验用户
+// ValidateUser 校验用户
 func (la *ldapAdapter) ValidateUser(username, userpwd string, f func(*ldap.Entry) (interface{}, error)) (ret interface{}, err error) {
 	var entry *ldap.Entry
 	if entry, err = la.ladpAuth(username, userpwd); err != nil {
@@ -110,21 +110,24 @@ func (la *ldapAdapter) ValidateUser(username, userpwd string, f func(*ldap.Entry
 	return f(entry)
 }
 
-//ladpAuth ....
-//ladp 认证
+// ladpAuth ....
+// ladp 认证
 func (la *ldapAdapter) ladpAuth(username, userpwd string) (ret *ldap.Entry, err error) {
+	// Search for user in LDAP
 	l, sr, err := la.ldapUserSearch("(sAMAccountName=" + username + ")")
-	defer l.Close()
 	if err != nil {
 		return nil, fmt.Errorf("ldapUserSearch failed, %s", err.Error())
 	}
+	defer l.Close()
+	// Check if user exists
 	if err != nil || len(sr.Entries) < 1 {
 		err = errors.New("user:" + username + " does not exist")
 		return nil, err
 	}
+	// Bind user to LDAP
 	if err = l.Bind(username+"@"+la.Region, userpwd); err != nil {
-		logs.Error("Passwd of user:", username, "error", err.Error())
-		return nil, fmt.Errorf("Passwd of user:%s error, %s", username, err.Error())
+		logs.Error("password of user:", username, "incorrect:", err.Error())
+		return nil, fmt.Errorf("password of user:%s error, %s", username, err.Error())
 	}
 	return sr.Entries[0], nil
 }
