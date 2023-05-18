@@ -14,7 +14,7 @@ import (
 	"github.com/astaxie/beego/logs"
 )
 
-//执行操作系统脚本或命令所依赖的对象
+// 执行操作系统脚本或命令所依赖的对象
 type ConcurrencyRunAdapter interface {
 	GetDir() (string, bool)     //获取命令执行路径，bool为false时不需要设置
 	DealStdOut(string) error    //标准输出
@@ -60,7 +60,7 @@ func ReplaceCmdNameByEnv(name string, envs []string) string {
 	return ReplaceCmdNameByEnv(name, envs)
 }
 
-//执行操作系统脚本或命令的方法
+// 执行操作系统脚本或命令的方法
 func ConcurrencyRun(name string, adapter ConcurrencyRunAdapter) (err error) {
 	defer adapter.CloseLogFile()
 	ctx, cancel := context.WithTimeout(context.Background(), adapter.GetTimeOut()) //超时时间以秒为单位
@@ -157,8 +157,8 @@ func ConcurrencyRun(name string, adapter ConcurrencyRunAdapter) (err error) {
 	return err
 }
 
-//同步执行操作系统命令的方法（获取命令返回值）
-//RunShellCommandString 执行shell命令，返回字符串
+// 同步执行操作系统命令的方法（获取命令返回值）
+// RunShellCommandString 执行shell命令，返回字符串
 func RunShellCommandString(cmdStr []string) (out string, err error) {
 	cmd := exec.Command(cmdStr[0], cmdStr[1:]...)
 	var rbytes []byte
