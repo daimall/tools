@@ -29,7 +29,7 @@ type lualib struct {
 func NewLua() *lualib {
 	return &lualib{
 		timeout: 60 * time.Second,
-		method:  "start",
+		method:  "Start",
 	}
 }
 
