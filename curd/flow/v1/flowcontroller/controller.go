@@ -70,8 +70,8 @@ func (c *FlowController) Action() {
 
 	idStr := c.Ctx.Input.Param(":id")
 	if serviceId, err = getUintID(idStr); err != nil {
-		logs.Error("get serviceId failed,", err.Error())
-		return
+		logs.Debug("get serviceId failed [%s], set it to zero", err.Error())
+		err = nil
 	}
 
 	if actionType == "" {
