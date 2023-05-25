@@ -29,7 +29,10 @@ func (c *FlowController) Mapping(method string, fn gin.HandlerFunc) {
 
 // according the method name to get the function
 func (c *FlowController) GetMapMethod(method string) gin.HandlerFunc {
-	return c.methodMapping[method]
+	if m, ok := c.methodMapping[method]; ok {
+		return m
+	}
+	panic("method[" + method + "] not in mapping")
 }
 
 // Post ...
@@ -308,4 +311,44 @@ func (f *FlowController) GetAll(c *gin.Context) {
 	}
 	logger.Error("get all method is not implemented")
 	c.Set(common.CustomErrKey, customerror.MethodNotImplement)
+}
+
+// Put ...
+// @Title Put
+// @Description update the Service
+// @Param	id		path 	string	true		"The id you want to update"
+// @Param	body		body 	Service	true		"body for Service content"
+// @Success 200 {object} Service
+// @Failure 403 :id is not int
+// @router /:service/:id [put]
+func (f *FlowController) Put(c *gin.Context) {
+	var err customerror.CustomError
+	var ret interface{}
+	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
+		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
+			defer func() {
+				c.Set(common.CRUDContextKey, crudContext)
+			}()
+			if crudContext.ServiceId != 0 {
+				if crudContext.Service, err = crudContext.Service.LoadInst(crudContext, c); err != nil {
+					c.Set(common.CustomErrKey, err)
+					return
+				}
+			}
+			if v := c.Query("fields"); v != "" {
+				crudContext.Fields = strings.Split(v, ",")
+			}
+			if updateApp, ok := crudContext.Service.(flowservice.UpdateInf); ok {
+				if ret, crudContext.OperateLog, err = updateApp.Update(crudContext, c); err != nil {
+					c.Set(common.CustomErrKey, err)
+					return
+				}
+				// update successfull
+				c.Set(common.ResponeDataKey, ret)
+				return
+			}
+		}
+	}
+	logger.Error("failed to find crud context")
+	c.Set(common.CustomErrKey, customerror.CRUDContextNotFound)
 }

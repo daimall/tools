@@ -78,7 +78,7 @@ type GetAllInf interface {
 
 type UpdateInf interface {
 	// 更新对象
-	Update(flowid uint, fields []string, c *gin.Context) (ret interface{}, oplog string, err error) // 刷新流程基础信息
+	Update(fc CRUDContext, c *gin.Context) (ret interface{}, oplog string, err customerror.CustomError) // 刷新流程基础信息
 
 }
 

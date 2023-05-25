@@ -1,7 +1,6 @@
 package flowcontroller
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -15,8 +14,8 @@ func init() {
 		fc.Mapping("Post", fc.Post)
 		fc.Mapping("GetOne", fc.GetOne)
 		fc.Mapping("GetAll", fc.GetAll)
-		// fc.Mapping("Put", fc.Put)
-		// fc.Mapping("Action", fc.Action)
+		fc.Mapping("Put", fc.Put)
+		fc.Mapping("Action", fc.Action)
 		// fc.Mapping("Delete", fc.Delete)
 		// fc.Mapping("DeleteList", fc.DeleteList)
 	}
@@ -41,7 +40,6 @@ func Router(r *gin.Engine, rootPath string, mappingMethods string, handlers ...g
 		hs = append(hs, handlers...)
 		switch mk {
 		case "get":
-			fmt.Println("GET>>>", rootPath, mv)
 			r.GET(rootPath, hs...)
 		case "post":
 			r.POST(rootPath, hs...)
