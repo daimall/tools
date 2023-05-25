@@ -84,7 +84,7 @@ func (f *FlowController) Action(c *gin.Context) {
 				return
 			}
 			if crudContext.ServiceId != 0 {
-				if crudContext.Service, err = crudContext.Service.LoadInst(crudContext.ServiceId); err != nil {
+				if crudContext.Service, err = crudContext.Service.LoadInst(crudContext, c); err != nil {
 					logger.Error("service.LoadInst failed,", err.Error())
 					c.Set(common.CustomErrKey, customerror.ServiceLoadFailed)
 					return
@@ -132,7 +132,7 @@ func (f *FlowController) GetOne(c *gin.Context) {
 			}()
 			crudContext.Action = common.ServiceActionGetOne
 			if getOneApp, ok := crudContext.Service.(flowservice.GetOneInf); ok {
-				if ret, crudContext.OperateLog, err = getOneApp.GetOne(c); err != nil {
+				if ret, crudContext.OperateLog, err = getOneApp.GetOne(crudContext, c); err != nil {
 					c.Set(common.CustomErrKey, err)
 					return
 				}

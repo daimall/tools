@@ -46,8 +46,9 @@ func PrepareMiddleWare() gin.HandlerFunc {
 			}
 		}
 		crudContext.UserName = username
-		if crudContext.Service, err = flowservice.GetService(c.Param("service")); err != nil {
-			logger.Error("get service bye name[%s] failed, %s", c.Param("service"), err.Error())
+		crudContext.ServiceName = c.Param("service")
+		if crudContext.Service, err = flowservice.GetService(crudContext.ServiceName); err != nil {
+			logger.Error("get service bye name[%s] failed, %s", crudContext.ServiceName, err.Error())
 			c.Set(common.CustomErrKey, err)
 			c.Next()
 			return

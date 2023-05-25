@@ -58,7 +58,7 @@ type FlowService interface {
 	// make新实例
 	NewInst() (flowService FlowService)
 	// 获取新实例（从数据库中加载初始值）
-	LoadInst(flowId uint) (flowService FlowService, err customerror.CustomError)
+	LoadInst(CRUDContext, *gin.Context) (flowService FlowService, err customerror.CustomError)
 }
 
 type ActionInf interface {
@@ -68,7 +68,7 @@ type ActionInf interface {
 
 type GetOneInf interface {
 	// 获取一个对象详情
-	GetOne(c *gin.Context) (ret interface{}, oplog string, err customerror.CustomError)
+	GetOne(CRUDContext, *gin.Context) (ret interface{}, oplog string, err customerror.CustomError)
 }
 
 type GetAllInf interface {

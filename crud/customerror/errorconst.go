@@ -55,3 +55,7 @@ var (
 	MethodNotImplement   = New(1013, "method is not implemented")    // 表示接口未实现
 	ServiceLoadFailed    = New(1014, "load service instance failed") // 获取server新实例失败
 )
+
+var (
+	InternalServerErrorCODE = InternalServerError.GetCode()
+)
