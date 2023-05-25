@@ -1,0 +1,20 @@
+web:
+  httpport: 8080
+  webKind: AMIS
+  needlogin: false
+
+env:
+  runmode: dev
+  username: devuser2
+restful:
+  code: status
+  message: msg
+  data: data
+
+crud:
+  oplogTblName: operatelog
+DB:
+  driver: sqlite3
+  password:
+  pwdEncryptKey:
+  sourceName: hello.db
