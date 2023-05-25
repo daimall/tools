@@ -27,10 +27,6 @@ func (c *FlowController) GetMapMethod(method string) gin.HandlerFunc {
 	return c.methodMapping[method]
 }
 
-type XXXS struct {
-	gin.Context
-}
-
 // Post ...
 // @Title 创建一条流程
 // @Description create Service
