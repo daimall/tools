@@ -17,3 +17,16 @@ const (
 	// ServiceIdKey    = "serviceId"
 	// OperationLogKey = "operationlog"
 )
+
+// Service action 常量
+const (
+	ServiceActionGetAll     = "GetAll"
+	ServiceActionGetOne     = "GetOne"
+	ServiceActionCreate     = "Create"
+	ServiceActionPut        = "Update"
+	ServiceActionDelete     = "Delete"
+	ServiceActionDeleteList = "DeleteList"
+
+	ServiceActionGetConfigs = "GetConfigs"
+	ServiceOpList           = "OperationList"
+)

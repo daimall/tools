@@ -38,7 +38,8 @@ func (f *FlowController) Post(c *gin.Context) {
 	var err customerror.CustomError
 	var ret interface{}
 	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
-		if crudContext, ok := crudContextInf.(CRUDContext); ok {
+		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
+			crudContext.Action = common.ServiceActionCreate
 			if crudContext.ServiceId, ret, crudContext.OperateLog, err = crudContext.Service.New(c); err != nil {
 				c.Set(common.CustomErrKey, err)
 				c.Next()
@@ -67,7 +68,8 @@ func (f *FlowController) GetOne(c *gin.Context) {
 	var err customerror.CustomError
 	var ret interface{}
 	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
-		if crudContext, ok := crudContextInf.(CRUDContext); ok {
+		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
+			crudContext.Action = common.ServiceActionGetOne
 			if getOneApp, ok := crudContext.Service.(flowservice.GetOneInf); ok {
 				if ret, crudContext.OperateLog, err = getOneApp.GetOne(c); err != nil {
 					c.Set(common.CustomErrKey, err)

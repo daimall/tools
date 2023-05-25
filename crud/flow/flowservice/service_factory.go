@@ -102,7 +102,7 @@ type MultiDeleteInf interface {
 // 日志表自定义接口
 type OplogModelInf interface {
 	// 返回操作日志记录对象（主要是确定表名）
-	OplogModel(uname, flow string, flowid uint, action, remark string) interface{}
+	OplogModel(*gin.Context, CRUDContext) interface{}
 }
 
 // 导入接口

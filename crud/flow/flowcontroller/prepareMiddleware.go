@@ -35,7 +35,7 @@ func PrepareMiddleWare() gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		crudContext := CRUDContext{}
+		crudContext := flowservice.CRUDContext{}
 		idStr := c.Param("id")
 		if idStr != "" {
 			if crudContext.ServiceId, err = functions.Str2Uint(idStr); err != nil {
