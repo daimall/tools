@@ -13,13 +13,13 @@ import (
 
 // 更新字段接口
 type Action interface {
-	Do(uname string, serviceId uint, actionType string, c *gin.Context) (ret interface{}, flowId uint, oplog string, err error)
+	Do(*gin.Context, CRUDContext) (ret interface{}, flowId uint, oplog string, err customerror.CustomError)
 }
 
 // flow handler 接口
 type FlowHandler interface {
 	// 保存用户的处理结果
-	Do(uname string, c *gin.Context) (ret interface{}, oplog string, err error)
+	Do(CRUDContext, *gin.Context) (ret interface{}, oplog string, err customerror.CustomError)
 	// 从数据库中加载数据，返回一个新实例
 	LoadInst(flow FlowService, uname string, id uint) (handler FlowHandler, err error)
 	LoadStepHandlers(tx *gorm.DB, flowId uint, stepKey string) (handlers []FlowHandler, err error)
@@ -58,12 +58,12 @@ type FlowService interface {
 	// make新实例
 	NewInst() (flowService FlowService)
 	// 获取新实例（从数据库中加载初始值）
-	LoadInst(flowId uint) (flowService FlowService, err error)
+	LoadInst(flowId uint) (flowService FlowService, err customerror.CustomError)
 }
 
 type ActionInf interface {
 	// 获取一个自定义动作
-	GetAction(serviceId uint, actionType string) (action Action, err error)
+	GetAction(serviceId uint, actionType string) (action Action, err customerror.CustomError)
 }
 
 type GetOneInf interface {
@@ -73,9 +73,7 @@ type GetOneInf interface {
 
 type GetAllInf interface {
 	// 获取所有流程
-	GetAll(uname string, query []*common.QueryConditon, fields []string,
-		sortby []string, order []string, offset int,
-		limit int) (ret interface{}, count int64, oplog string, err error)
+	GetAll(CRUDContext, *gin.Context) (ret interface{}, count int64, oplog string, err customerror.CustomError)
 }
 
 type UpdateInf interface {

@@ -13,7 +13,7 @@ func init() {
 		fc = &FlowController{}
 		fc.Mapping("Post", fc.Post)
 		fc.Mapping("GetOne", fc.GetOne)
-		// fc.Mapping("GetAll", fc.GetAll)
+		fc.Mapping("GetAll", fc.GetAll)
 		// fc.Mapping("Put", fc.Put)
 		// fc.Mapping("Action", fc.Action)
 		// fc.Mapping("Delete", fc.Delete)

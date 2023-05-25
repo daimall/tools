@@ -52,5 +52,6 @@ var (
 	UploadErr            = New(1010, "Failed to Upload File")        // 表示上传文件失败
 	ServiceNotFound      = New(1011, "Service Not Found")            // 表示服务没有注册
 	CRUDContextNotFound  = New(1012, "CRUD Context Not Found")       // 表示gin上下文中缺少	CRUDContext
-	MethodNotImplement   = New(1012, "method is not implemented")    // 表示接口未实现
+	MethodNotImplement   = New(1013, "method is not implemented")    // 表示接口未实现
+	ServiceLoadFailed    = New(1014, "load service instance failed") // 获取server新实例失败
 )

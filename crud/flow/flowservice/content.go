@@ -1,5 +1,7 @@
 package flowservice
 
+import "github.com/daimall/tools/crud/common"
+
 type CRUDContext struct {
 	UserName    string
 	ServiceName string
@@ -7,4 +9,12 @@ type CRUDContext struct {
 	Service     FlowService
 	OperateLog  string
 	Action      string
+
+	// getall 参数
+	Fields        []string
+	Sortby        []string
+	Order         []string
+	QueryConditon []*common.QueryConditon
+	Limit         int
+	Offset        int
 }
