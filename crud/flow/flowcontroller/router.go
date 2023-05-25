@@ -1,6 +1,7 @@
 package flowcontroller
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,7 @@ func Router(r *gin.Engine, rootPath string, mappingMethods string, handlers ...g
 		hs = append(hs, handlers...)
 		switch mk {
 		case "get":
+			fmt.Println("GET>>>", rootPath, mv)
 			r.GET(rootPath, hs...)
 		case "post":
 			r.POST(rootPath, hs...)
