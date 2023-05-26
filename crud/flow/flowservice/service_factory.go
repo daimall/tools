@@ -90,7 +90,7 @@ type DeleteCompatible1Inf interface {
 
 type DeleteInf interface {
 	// 删除一个对象
-	Delete(flowId uint, uname string, c *gin.Context) (ret interface{}, oplog string, err error)
+	Delete(CRUDContext, *gin.Context) (ret interface{}, oplog string, err customerror.CustomError)
 }
 type MultiDeleteInf interface {
 	// 删除多个对象
@@ -131,10 +131,6 @@ type PreHandlersInf interface {
 	GetPreHandlers() (ret interface{}, oplog string, err error)
 }
 
-type SetBaseControllerInf interface {
-	// 获取上一步操作者
-	SetBaseController(c *gin.Context)
-}
 type GetConfigsInf interface {
 	// 获取处理当前流程所需要对参数对象（供前端使用）
 	GetConfigs(uname string, id uint, c *gin.Context) (ret interface{}, oplog string, err error)

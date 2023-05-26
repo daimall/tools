@@ -190,6 +190,7 @@ func (f *FlowController) GetAll(c *gin.Context) {
 		return
 	}
 	defer func() {
+		crudContext.Action = common.ServiceActionGetAll
 		c.Set(common.CRUDContextKey, crudContext)
 	}()
 	// fields: col1,col2,entity.col3
@@ -329,6 +330,7 @@ func (f *FlowController) Put(c *gin.Context) {
 			defer func() {
 				c.Set(common.CRUDContextKey, crudContext)
 			}()
+			crudContext.Action = common.ServiceActionPut
 			if crudContext.ServiceId != 0 {
 				if crudContext.Service, err = crudContext.Service.LoadInst(crudContext, c); err != nil {
 					c.Set(common.CustomErrKey, err)
@@ -344,6 +346,37 @@ func (f *FlowController) Put(c *gin.Context) {
 					return
 				}
 				// update successfull
+				c.Set(common.ResponeDataKey, ret)
+				return
+			}
+		}
+	}
+	logger.Error("failed to find crud context")
+	c.Set(common.CustomErrKey, customerror.CRUDContextNotFound)
+}
+
+// Delete ...
+// @Title Delete
+// @Description delete the Service
+// @Param	id		path 	string	true		"The id you want to delete"
+// @Success 200 {string} delete success!
+// @Failure 403 id is empty
+// @router /:service/:id [delete]
+func (fs *FlowController) Delete(c *gin.Context) {
+	var err customerror.CustomError
+	var ret interface{}
+	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
+		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
+			defer func() {
+				c.Set(common.CRUDContextKey, crudContext)
+			}()
+			crudContext.Action = common.ServiceActionDelete
+			if deleteApp, ok := crudContext.Service.(flowservice.DeleteInf); ok {
+				if ret, crudContext.OperateLog, err = deleteApp.Delete(crudContext, c); err != nil {
+					c.Set(common.CustomErrKey, err)
+					return
+				}
+				// delete successfull
 				c.Set(common.ResponeDataKey, ret)
 				return
 			}

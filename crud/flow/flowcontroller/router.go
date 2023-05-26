@@ -16,7 +16,7 @@ func init() {
 		fc.Mapping("GetAll", fc.GetAll)
 		fc.Mapping("Put", fc.Put)
 		fc.Mapping("Action", fc.Action)
-		// fc.Mapping("Delete", fc.Delete)
+		fc.Mapping("Delete", fc.Delete)
 		// fc.Mapping("DeleteList", fc.DeleteList)
 	}
 }
