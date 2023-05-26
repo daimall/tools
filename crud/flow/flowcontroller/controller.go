@@ -43,7 +43,7 @@ func (c *FlowController) GetMapMethod(method string) gin.HandlerFunc {
 // @Failure 403 body is empty
 // @router /:service [post]
 func (f *FlowController) Post(c *gin.Context) {
-	var err customerror.CustomError
+	var err error
 	var ret interface{}
 	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
 		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
@@ -72,7 +72,7 @@ func (f *FlowController) Post(c *gin.Context) {
 // @Failure 403 body is empty
 // @router /:service/:id/:action [post]
 func (f *FlowController) Action(c *gin.Context) {
-	var err customerror.CustomError
+	var err error
 	var ret interface{}
 	var action flowservice.Action
 	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
@@ -104,7 +104,7 @@ func (f *FlowController) Action(c *gin.Context) {
 				logger.Error("GetAction method is not implement")
 				return
 			}
-			if ret, crudContext.ServiceId, crudContext.OperateLog, err = action.Do(c, crudContext); err != nil {
+			if ret, crudContext.ServiceId, crudContext.OperateLog, err = action.Do(crudContext, c); err != nil {
 				logger.Error("action.do failed,", err.Error())
 				c.Set(common.CustomErrKey, customerror.InternalServerError)
 				return
@@ -126,7 +126,7 @@ func (f *FlowController) Action(c *gin.Context) {
 // @Failure 403 :id is empty
 // @router /:service/:id [get]
 func (f *FlowController) GetOne(c *gin.Context) {
-	var err customerror.CustomError
+	var err error
 	var ret interface{}
 	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
 		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
@@ -165,7 +165,7 @@ func (f *FlowController) GetOne(c *gin.Context) {
 // @Failure 403
 // @router /:service [get]
 func (f *FlowController) GetAll(c *gin.Context) {
-	var err customerror.CustomError
+	var err error
 	var ret struct {
 		Items interface{} `json:"items"`
 		Total int64       `json:"total"`
@@ -323,7 +323,7 @@ func (f *FlowController) GetAll(c *gin.Context) {
 // @Failure 403 :id is not int
 // @router /:service/:id [put]
 func (f *FlowController) Put(c *gin.Context) {
-	var err customerror.CustomError
+	var err error
 	var ret interface{}
 	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
 		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
@@ -362,8 +362,8 @@ func (f *FlowController) Put(c *gin.Context) {
 // @Success 200 {string} delete success!
 // @Failure 403 id is empty
 // @router /:service/:id [delete]
-func (fs *FlowController) Delete(c *gin.Context) {
-	var err customerror.CustomError
+func (f *FlowController) Delete(c *gin.Context) {
+	var err error
 	var ret interface{}
 	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
 		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
@@ -377,6 +377,38 @@ func (fs *FlowController) Delete(c *gin.Context) {
 					return
 				}
 				// delete successfull
+				c.Set(common.ResponeDataKey, ret)
+				return
+			}
+		}
+	}
+	logger.Error("failed to find crud context")
+	c.Set(common.CustomErrKey, customerror.CRUDContextNotFound)
+}
+
+// DeleteList ...
+// @Title multi-Delete
+// @Description delete multi Services
+// @Param	ids	 	string	true		"The ids you want to delete"
+// @Success 200 {string} delete success!
+// @Failure 403 id is empty
+// @router /:service/deletelist [delete]
+func (f *FlowController) DeleteList(c *gin.Context) {
+	var err error
+	var ret interface{}
+	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
+		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
+			defer func() {
+				c.Set(common.CRUDContextKey, crudContext)
+			}()
+			crudContext.Action = common.ServiceActionDeleteList
+			if dlApp, ok := crudContext.Service.(flowservice.MultiDeleteInf); ok {
+				ids := strings.Split(c.Param("ids"), ",")
+				if ret, crudContext.OperateLog, err = dlApp.MultiDelete(ids, crudContext, c); err != nil {
+					c.Set(common.CustomErrKey, err)
+					return
+				}
+				// delete list successfull
 				c.Set(common.ResponeDataKey, ret)
 				return
 			}

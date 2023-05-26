@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/astaxie/beego/logs"
-	"github.com/daimall/tools/crud/customerror"
 	"github.com/daimall/tools/crud/dbmysql/dbgorm"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -34,7 +33,7 @@ type CheckHandler struct {
 	PreStepHandlerIds []uint `gorm:"-" json:"preStepHandlerIds"` // 上一步需要重新审批的用户
 }
 
-func (h *CheckHandler) Do(crudContext CRUDContext, c *gin.Context) (ret interface{}, oplog string, err customerror.CustomError) {
+func (h *CheckHandler) Do(crudContext CRUDContext, c *gin.Context) (ret interface{}, oplog string, err error) {
 
 	return
 }

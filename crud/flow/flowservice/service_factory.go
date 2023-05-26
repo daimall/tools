@@ -13,13 +13,13 @@ import (
 
 // 更新字段接口
 type Action interface {
-	Do(*gin.Context, CRUDContext) (ret interface{}, flowId uint, oplog string, err customerror.CustomError)
+	Do(CRUDContext, *gin.Context) (ret interface{}, flowId uint, oplog string, err error)
 }
 
 // flow handler 接口
 type FlowHandler interface {
 	// 保存用户的处理结果
-	Do(CRUDContext, *gin.Context) (ret interface{}, oplog string, err customerror.CustomError)
+	Do(CRUDContext, *gin.Context) (ret interface{}, oplog string, err error)
 	// 从数据库中加载数据，返回一个新实例
 	LoadInst(flow FlowService, uname string, id uint) (handler FlowHandler, err error)
 	LoadStepHandlers(tx *gorm.DB, flowId uint, stepKey string) (handlers []FlowHandler, err error)
@@ -54,47 +54,41 @@ type FlowService interface {
 	// 获取flowname
 	GetFlowName() string
 	// 新建流程
-	New(c *gin.Context) (flowId uint, ret interface{}, oplog string, err customerror.CustomError)
+	New(c *gin.Context) (flowId uint, ret interface{}, oplog string, err error)
 	// make新实例
 	NewInst() (flowService FlowService)
 	// 获取新实例（从数据库中加载初始值）
-	LoadInst(CRUDContext, *gin.Context) (flowService FlowService, err customerror.CustomError)
+	LoadInst(CRUDContext, *gin.Context) (flowService FlowService, err error)
 }
 
 type ActionInf interface {
 	// 获取一个自定义动作
-	GetAction(serviceId uint, actionType string) (action Action, err customerror.CustomError)
+	GetAction(serviceId uint, actionType string) (action Action, err error)
 }
 
 type GetOneInf interface {
 	// 获取一个对象详情
-	GetOne(CRUDContext, *gin.Context) (ret interface{}, oplog string, err customerror.CustomError)
+	GetOne(CRUDContext, *gin.Context) (ret interface{}, oplog string, err error)
 }
 
 type GetAllInf interface {
 	// 获取所有流程
-	GetAll(CRUDContext, *gin.Context) (ret interface{}, count int64, oplog string, err customerror.CustomError)
+	GetAll(CRUDContext, *gin.Context) (ret interface{}, count int64, oplog string, err error)
 }
 
 type UpdateInf interface {
 	// 更新对象
-	Update(fc CRUDContext, c *gin.Context) (ret interface{}, oplog string, err customerror.CustomError) // 刷新流程基础信息
+	Update(fc CRUDContext, c *gin.Context) (ret interface{}, oplog string, err error) // 刷新流程基础信息
 
-}
-
-// 兼容老接口
-type DeleteCompatible1Inf interface {
-	// 删除一个对象
-	Delete(uint) (ret interface{}, oplog string, err error)
 }
 
 type DeleteInf interface {
 	// 删除一个对象
-	Delete(CRUDContext, *gin.Context) (ret interface{}, oplog string, err customerror.CustomError)
+	Delete(CRUDContext, *gin.Context) (ret interface{}, oplog string, err error)
 }
 type MultiDeleteInf interface {
 	// 删除多个对象
-	MultiDelete([]string) (ret interface{}, oplog string, err error)
+	MultiDelete([]string, CRUDContext, *gin.Context) (ret interface{}, oplog string, err error)
 }
 
 // 日志表自定义接口
