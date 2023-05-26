@@ -1,6 +1,7 @@
 package flowcontroller
 
 import (
+	"io"
 	"strconv"
 	"strings"
 
@@ -298,8 +299,6 @@ func (f *FlowController) GetAll(c *gin.Context) {
 			}
 		}
 	}
-
-	crudContext.Action = common.ServiceActionGetOne
 	if getAllApp, ok := crudContext.Service.(flowservice.GetAllInf); ok {
 		if ret.Items, ret.Total, crudContext.OperateLog, err = getAllApp.GetAll(crudContext, c); err != nil {
 			logs.Error("getall failed,", err.Error())
@@ -416,4 +415,182 @@ func (f *FlowController) DeleteList(c *gin.Context) {
 	}
 	logger.Error("failed to find crud context")
 	c.Set(common.CustomErrKey, customerror.CRUDContextNotFound)
+}
+
+// Import ...
+// @Title 导出excel，批量创建对象
+// @Description batch create Service
+// @Param	service	string 	Service	true		"body for Service content"
+// @Success 201 {int} Service
+// @Failure 403 body is empty
+// @router /:service/import [post]
+func (f *FlowController) Import(c *gin.Context) {
+	var err error
+	var ret interface{}
+	if crudContextInf, ok := c.Get(common.CRUDContextKey); ok {
+		if crudContext, ok := crudContextInf.(flowservice.CRUDContext); ok {
+			defer func() {
+				c.Set(common.CRUDContextKey, crudContext)
+			}()
+			crudContext.Action = common.ServiceActionImport
+			if importApp, ok := crudContext.Service.(flowservice.Import); ok {
+				if file, verr := c.FormFile("importFile"); verr == nil {
+					var importFile io.Reader
+					if importFile, err = file.Open(); err != nil {
+						logger.Error("open file[importFile] failed,", err.Error())
+						c.Set(common.CustomErrKey, customerror.ImportFileFailed)
+						return
+					}
+					if ret, crudContext.OperateLog, err = importApp.Import(importFile, crudContext, c); err != nil {
+						c.Set(common.CustomErrKey, err)
+						return
+					}
+					// import successfull
+					c.Set(common.ResponeDataKey, ret)
+					return
+				} else {
+					logger.Error("get importFile failed,", err.Error())
+					c.Set(common.CustomErrKey, customerror.ImportFileFailed)
+					return
+				}
+			}
+		}
+	}
+	logger.Error("failed to find crud context")
+	c.Set(common.CustomErrKey, customerror.CRUDContextNotFound)
+}
+
+// Export ...
+// @Title export
+// @Description get Service
+// @Param	query	query	string	false	"Filter. e.g. col1:v1,col2:v2 ..."
+// @Param	fields	query	string	false	"Fields returned. e.g. col1,col2 ..."
+// @Param	sortby	query	string	false	"Sorted-by fields. e.g. col1,col2 ..."
+// @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
+// @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
+// @Param	offset	query	string	false	"Start position of result set. Must be an integer"
+// @Success 200 {object} Service
+// @Failure 403
+// @router /:service/export [get]
+func (f *FlowController) Export(c *gin.Context) {
+	var err error
+	var crudContextInf interface{}
+	var ok bool
+	var crudContext flowservice.CRUDContext
+	if crudContextInf, ok = c.Get(common.CRUDContextKey); !ok {
+		logger.Error("get crudContextInf failed")
+		c.Set(common.CustomErrKey, customerror.CRUDContextNotFound)
+		return
+	}
+	if crudContext, ok = crudContextInf.(flowservice.CRUDContext); !ok {
+		logger.Error("get CRUDContext failed")
+		c.Set(common.CustomErrKey, customerror.CRUDContextNotFound)
+		return
+	}
+	defer func() {
+		crudContext.Action = common.ServiceActionExport
+		c.Set(common.CRUDContextKey, crudContext)
+	}()
+	// fields: col1,col2,entity.col3
+	if v := c.GetString("fields"); v != "" {
+		crudContext.Fields = strings.Split(v, ",")
+	}
+	// sortby: col1,col2
+	if v := c.GetString("sortby"); v != "" {
+		v = strings.Replace(v, ".", "__", -1)
+		crudContext.Sortby = strings.Split(v, ",")
+	}
+
+	// 适配amis
+	if v := c.GetString("orderBy"); v != "" {
+		crudContext.Sortby = []string{v}
+	}
+
+	// order: desc,asc
+	if v := c.GetString("order"); v != "" {
+		crudContext.Order = strings.Split(v, ",")
+	}
+
+	// 适配amis
+	if v := c.GetString("orderDir"); v != "" {
+		crudContext.Order = []string{v}
+	}
+
+	var keepMap = map[string]struct{}{
+		"orderDir": {},
+		"orderBy":  {},
+		"page":     {},
+		"perPage":  {},
+	}
+	if viper.GetString("web.webKind") == "AMIS" {
+		// query: k|type=v,v,v  k|type:v|v|v  其中Type可以没有,默认值是 MultiText
+		kv := c.Request.URL.Query()
+		for kInit, v1 := range kv {
+			if _, ok := keepMap[kInit]; ok {
+				continue
+			}
+			vInit := v1[0]
+			qcondtion := new(common.QueryConditon)
+			key_type := strings.Split(kInit, "|") // 解析key中的type信息
+			if len(key_type) == 2 {
+				qcondtion.QueryKey = key_type[0]
+				qcondtion.QueryType = key_type[1]
+			} else if len(key_type) == 1 {
+				qcondtion.QueryKey = key_type[0]
+				qcondtion.QueryType = common.MultiText
+			} else {
+				logs.Error("Error: invalid query key|type format," + kInit)
+				c.Set(common.CustomErrKey, customerror.QueryCondErr)
+				return
+			}
+			qcondtion.QueryValues = strings.Split(vInit, ",") // 解析出values信息
+			//qcondtion.QueryKey = strings.Replace(qcondtion.QueryKey, ".", "__", -1)
+			crudContext.QueryConditon = append(crudContext.QueryConditon, qcondtion)
+		}
+	} else {
+		// query: k|type:v|v|v,k|type:v|v|v  其中Type可以没有,默认值是 MultiText
+		if v := c.GetString("query"); v != "" {
+			for _, cond := range strings.Split(v, ",") { // 分割多个查询key
+				qcondtion := new(common.QueryConditon)
+				kv := strings.SplitN(cond, ":", 2)
+				if len(kv) != 2 {
+					logs.Error("query condtion format error:%s, need key:value", kv)
+					c.Set(common.CustomErrKey, customerror.QueryCondErr)
+					return
+				}
+				kInit, vInit := kv[0], kv[1]          // 初始分割查询key和value（备注，value是多个用|分割）
+				key_type := strings.Split(kInit, "|") // 解析key中的type信息
+				if len(key_type) == 2 {
+					qcondtion.QueryKey = key_type[0]
+					qcondtion.QueryType = key_type[1]
+				} else if len(key_type) == 1 {
+					qcondtion.QueryKey = key_type[0]
+					qcondtion.QueryType = common.MultiText
+				} else {
+					logs.Error("Error: invalid query key|type format," + kInit)
+					c.Set(common.CustomErrKey, customerror.QueryCondErr)
+					return
+				}
+				qcondtion.QueryValues = strings.Split(vInit, "|") // 解析出values信息
+				//qcondtion.QueryKey = strings.Replace(qcondtion.QueryKey, ".", "__", -1)
+				crudContext.QueryConditon = append(crudContext.QueryConditon, qcondtion)
+			}
+		}
+	}
+
+	if exportApp, ok := crudContext.Service.(flowservice.Export); ok {
+		var content io.ReadSeeker
+		if content, crudContext.OperateLog, err = exportApp.Export(crudContext, c); err != nil {
+			logs.Error("export file failed,", err.Error())
+			c.Set(common.CustomErrKey, customerror.ExportFileFailed)
+			return
+		}
+		c.Header("Content-Disposition", "attachment; filename="+crudContext.ServiceName+".xlsx")
+		c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+		io.Copy(c.Writer, content)
+		c.Abort()
+		return
+	}
+	logger.Error("export method is not implemented")
+	c.Set(common.CustomErrKey, customerror.MethodNotImplement)
 }

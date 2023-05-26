@@ -26,6 +26,8 @@ const (
 	ServiceActionPut        = "Update"
 	ServiceActionDelete     = "Delete"
 	ServiceActionDeleteList = "DeleteList"
+	ServiceActionImport     = "Import"
+	ServiceActionExport     = "Export"
 
 	ServiceActionGetConfigs = "GetConfigs"
 	ServiceOpList           = "OperationList"

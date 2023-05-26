@@ -18,6 +18,8 @@ func init() {
 		fc.Mapping("Action", fc.Action)
 		fc.Mapping("Delete", fc.Delete)
 		fc.Mapping("DeleteList", fc.DeleteList)
+		fc.Mapping("Import", fc.Import)
+		fc.Mapping("Export", fc.Export)
 	}
 }
 

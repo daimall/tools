@@ -1,6 +1,9 @@
 package customerror
 
 var (
+	// IO 异常
+	ImportFileFailed = New(301, "Import file failed") // 表示导入文件失败
+	ExportFileFailed = New(302, "Export file failed") // 表示导出文件失败
 	// HTTP错误常量
 	Unauthorized         = New(401, "Unauthorized")
 	Forbidden            = New(403, "Forbidden")

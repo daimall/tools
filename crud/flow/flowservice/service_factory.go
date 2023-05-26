@@ -5,7 +5,6 @@ import (
 	"io"
 	"reflect"
 
-	"github.com/daimall/tools/crud/common"
 	"github.com/daimall/tools/crud/customerror"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -100,14 +99,13 @@ type OplogModelInf interface {
 // 导入接口
 type Import interface {
 	// 导入操作
-	Import(uname string, importFile io.Reader, c *gin.Context) (ret interface{}, oplog string, err error)
+	Import(io.Reader, CRUDContext, *gin.Context) (ret interface{}, oplog string, err error)
 }
 
 // 导出接口
 type Export interface {
 	// 返回excel文件连接
-	Export(uname string, query []*common.QueryConditon, fields []string,
-		sortby []string, order []string) (content io.ReadSeeker, oplog string, err error)
+	Export(CRUDContext, *gin.Context) (content io.ReadSeeker, oplog string, err error)
 }
 
 type OpHistoryInf interface {
