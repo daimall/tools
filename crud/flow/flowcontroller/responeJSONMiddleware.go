@@ -1,13 +1,14 @@
 package flowcontroller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/daimall/tools/crud/common"
+	"github.com/daimall/tools/crud/customerror"
 	"github.com/daimall/tools/crud/dbmysql/dbgorm"
 	"github.com/daimall/tools/crud/flow/flowservice"
 	"github.com/daimall/tools/crud/oplog"
-	"github.com/daimall/tools/curd/customerror"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 )
@@ -46,10 +47,16 @@ func checkGinError(c *gin.Context) {
 		return
 	}
 	// 检查自定义错误
-	if err, ok := c.Keys[common.CustomErrKey].(customerror.CustomError); ok {
+	if err, ok := c.Get(common.CustomErrKey); ok {
+		// 有错误
+		var cerr customerror.CustomError
+		if cerr, ok = err.(customerror.CustomError); !ok {
+			// 非customerror ，转换
+			cerr = customerror.New(customerror.InternalServerErrorCODE, fmt.Sprintf("%s", err))
+		}
 		c.JSON(http.StatusBadRequest, gin.H{
-			viper.GetString("restful.code"):    err.GetCode(),
-			viper.GetString("restful.message"): err.GetMessage(),
+			viper.GetString("restful.code"):    cerr.GetCode(),
+			viper.GetString("restful.message"): cerr.GetMessage(),
 		})
 		c.Abort()
 		return
@@ -77,18 +84,4 @@ func recordOperateLog(c *gin.Context) {
 			}
 		}
 	}
-
-	// if log == "" {
-	// 	// 不记录操作日志
-	// 	return
-	// }
-	// var logModel interface{}
-	// if logService, ok := c.Service.(flowservice.OplogModelInf); ok {
-	// 	logModel = logService.OplogModel(c.uname, c.ServiceName, serviceId, action, log)
-	// }
-	// if logModel == nil {
-	// 	logModel = &oplog.OpLog{User: c.uname, Action: action,
-	// 		FlowId: serviceId, Flow: c.ServiceName, Remark: log}
-	// }
-	// oplog.AddOperationLog(dbgorm.GetDBInst(), logModel)
 }
