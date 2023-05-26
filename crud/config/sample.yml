@@ -6,6 +6,7 @@ web:
 env:
   runmode: dev
   username: devuser2
+  
 restful:
   code: status
   message: msg
@@ -13,8 +14,14 @@ restful:
 
 crud:
   oplogTblName: operatelog
+
 DB:
   driver: sqlite3
   password:
   pwdEncryptKey:
   sourceName: hello.db
+
+log:
+  maxFileSize: 20
+  maxBackups: 5
+  maxAge: 5
