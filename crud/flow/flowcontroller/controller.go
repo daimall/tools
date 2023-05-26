@@ -403,7 +403,7 @@ func (f *FlowController) DeleteList(c *gin.Context) {
 			}()
 			crudContext.Action = common.ServiceActionDeleteList
 			if dlApp, ok := crudContext.Service.(flowservice.MultiDeleteInf); ok {
-				ids := strings.Split(c.Param("ids"), ",")
+				ids := strings.Split(c.Query("ids"), ",")
 				if ret, crudContext.OperateLog, err = dlApp.MultiDelete(ids, crudContext, c); err != nil {
 					c.Set(common.CustomErrKey, err)
 					return
