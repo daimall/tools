@@ -1,6 +1,8 @@
 package adbclient
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -17,6 +19,7 @@ type Options struct {
 	ServicePort  int    // servicePort 设备侧监听端口号 [9008]
 	Method       string // method 请求方法
 	SaveFilePath string // 针对文件下载方法有效，保存文件到本地路径
+	PostData     []byte // 请求消息体
 }
 
 type Option func(*Options)
@@ -42,6 +45,12 @@ func WithHTTPMethod(value string) Option {
 func WithSaveFilePath(value string) Option {
 	return func(o *Options) {
 		o.SaveFilePath = value
+	}
+}
+
+func WithPostData(value []byte) Option {
+	return func(o *Options) {
+		o.PostData = value
 	}
 }
 
@@ -90,8 +99,11 @@ func HTTPRequest(path2adb, uri, deviceId string, options ...Option) (body []byte
 		Transport: transport,
 	}
 	var request *http.Request = &http.Request{
-		Method: http.MethodGet,
+		Method: opt.Method,
 		URL:    &url.URL{Scheme: "http", Host: "localhost", Path: uri},
+	}
+	if len(opt.PostData) > 0 {
+		request.Body = io.NopCloser(bytes.NewBuffer(opt.PostData))
 	}
 	// 发送请求并获取响应
 	var response *http.Response
@@ -100,6 +112,9 @@ func HTTPRequest(path2adb, uri, deviceId string, options ...Option) (body []byte
 		return nil, err
 	}
 	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("response statusCode[%d] not ok[%d]", response.StatusCode, http.StatusOK)
+	}
 	if opt.SaveFilePath != "" {
 		// 保存文件的方式
 		var file *os.File
