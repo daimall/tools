@@ -84,8 +84,8 @@ github.com/couchbase/go-couchbase v0.0.0-20200519150804-63f3cdb75e0d/go.mod h1:T
 github.com/couchbase/gomemcached v0.0.0-20200526233749-ec430f949808/go.mod h1:srVSlQLB8iXBVXHgnqemxUXqN6FCvClgCMPCsjBDR7c=
 github.com/couchbase/goutils v0.0.0-20180530154633-e865a1461c8a/go.mod h1:BQwMFlJzDjFDG3DJUdU0KORxn88UlsOULuxLExMh3Hs=
 github.com/cupcake/rdb v0.0.0-20161107195141-43ba34106c76/go.mod h1:vYwsqCOLxGiisLwp9rITslkFNpZD5rz43tf41QFkTWY=
-github.com/daimall/goadb v0.0.0-20230626022033-8b08113aa19d h1:XdNqenmIbKmo8rFgijlbLmfzaG9FUagIT2CeD3KmZ00=
-github.com/daimall/goadb v0.0.0-20230626022033-8b08113aa19d/go.mod h1:QNLzsh+fIm4s3PGXvziqsip9JQuMXoOQi1G0A5szzMI=
+github.com/daimall/goadb v0.0.0-20230707061026-5a7fbf6a3697 h1:V0oDE1ElW31QU+8PiP8nl8kbnwZ3fqlDZCcxt443mck=
+github.com/daimall/goadb v0.0.0-20230707061026-5a7fbf6a3697/go.mod h1:QNLzsh+fIm4s3PGXvziqsip9JQuMXoOQi1G0A5szzMI=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

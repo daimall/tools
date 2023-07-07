@@ -6,7 +6,7 @@ replace github.com/ugorji/go => github.com/ugorji/go v1.2.9
 
 require (
 	github.com/astaxie/beego v1.12.3
-	github.com/daimall/goadb v0.0.0-20230626022033-8b08113aa19d
+	github.com/daimall/goadb v0.0.0-20230707061026-5a7fbf6a3697
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/contrib v0.0.0-20221130124618-7e01895a63f2
 	github.com/gin-gonic/gin v1.9.0
