@@ -89,7 +89,7 @@ func (f *FlowController) Action(c *gin.Context) {
 			}
 			if crudContext.ServiceId != 0 {
 				if crudContext.Service, err = crudContext.Service.LoadInst(crudContext, c); err != nil {
-					logger.Error("service.LoadInst failed,", err.Error())
+					logger.Error("service.LoadInst failed, %s", err.Error())
 					c.Set(common.CustomErrKey, customerror.ServiceLoadFailed)
 					return
 				}
@@ -106,7 +106,7 @@ func (f *FlowController) Action(c *gin.Context) {
 				return
 			}
 			if ret, crudContext.ServiceId, crudContext.OperateLog, err = action.Do(crudContext, c); err != nil {
-				logger.Error("action.do failed,", err.Error())
+				logger.Error("action.do failed, %s", err.Error())
 				c.Set(common.CustomErrKey, customerror.InternalServerError)
 				return
 			}
@@ -437,7 +437,7 @@ func (f *FlowController) Import(c *gin.Context) {
 				if file, verr := c.FormFile("importFile"); verr == nil {
 					var importFile io.Reader
 					if importFile, err = file.Open(); err != nil {
-						logger.Error("open file[importFile] failed,", err.Error())
+						logger.Error("open file[importFile] failed, %s", err.Error())
 						c.Set(common.CustomErrKey, customerror.ImportFileFailed)
 						return
 					}
@@ -449,7 +449,7 @@ func (f *FlowController) Import(c *gin.Context) {
 					c.Set(common.ResponeDataKey, ret)
 					return
 				} else {
-					logger.Error("get importFile failed,", err.Error())
+					logger.Error("get importFile failed, %s", err.Error())
 					c.Set(common.CustomErrKey, customerror.ImportFileFailed)
 					return
 				}
