@@ -7,10 +7,21 @@ import (
 )
 
 const (
-	AND = "AND"
-	OR  = "OR"
+	AND = "AND" // 逻辑与操作符
+	OR  = "OR"  // 逻辑或操作符
 )
 
+// Calculate 函数解析并计算给定的布尔表达式字符串。
+// 参数:
+//
+//	str: 待计算的布尔表达式字符串，可以包含布尔值、逻辑操作符（AND、OR）、括号和标识符。
+//	stackSize: 布尔值和操作符栈的最大大小。
+//	boolFunc: 一个用于从标识符获取布尔值的回调函数。
+//
+// 返回值:
+//
+//	r: 计算结果的布尔值。
+//	b: 如果在计算过程中出现错误，则为一个描述错误的字符串；如果没有错误，则为nil。
 func Calculate(str string, stackSize int, boolFunc func(string) bool) (r bool, b error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -18,14 +29,19 @@ func Calculate(str string, stackSize int, boolFunc func(string) bool) (r bool, b
 			return
 		}
 	}()
+
+	// 创建用于存储布尔值的栈和操作符的栈
 	var boolStack = newStack(true, stackSize)
 	var symbolStack = newStack("", stackSize)
 
+	// 初始化字符串扫描器
 	var s scanner.Scanner
 	s.Mode = scanner.ScanIdents
 	s.Init(strings.NewReader(str))
 	tok := s.Scan()
 	tt := s.TokenText()
+
+	// 开始解析表达式
 	for tok != scanner.EOF {
 		switch tok {
 		case scanner.Ident:
@@ -34,7 +50,7 @@ func Calculate(str string, stackSize int, boolFunc func(string) bool) (r bool, b
 					symbolStack.Push(tt)
 				} else {
 					symbol := symbolStack.Peek()
-					if tt == ("(") {
+					if tt == "(" {
 						symbolStack.Push(tt)
 					}
 					if getPriority(tt) < getPriority(symbol) {
@@ -54,6 +70,7 @@ func Calculate(str string, stackSize int, boolFunc func(string) bool) (r bool, b
 		case '(':
 			symbolStack.Push("(")
 		case ')':
+			// 处理右括号，执行相应计算
 			for {
 				symbol := symbolStack.Pop()
 				if symbol != "(" {
@@ -70,6 +87,8 @@ func Calculate(str string, stackSize int, boolFunc func(string) bool) (r bool, b
 		}
 		tok, tt = s.Scan(), s.TokenText()
 	}
+
+	// 执行剩余的计算
 	for symbolStack.Len() != 0 {
 		if boolStack.Len() < 2 {
 			return false, errors.New("err7 表达式错误")
@@ -80,6 +99,8 @@ func Calculate(str string, stackSize int, boolFunc func(string) bool) (r bool, b
 		ret := getSum(data1, data2, symbol)
 		boolStack.Push(ret)
 	}
+
+	// 验证计算结果并返回
 	if boolStack.Len() != 1 {
 		return false, errors.New("err10 表达式有误")
 	}
@@ -87,6 +108,7 @@ func Calculate(str string, stackSize int, boolFunc func(string) bool) (r bool, b
 	return ret, nil
 }
 
+// getSum 根据给定的操作符执行布尔运算。
 func getSum(cond1 bool, cond2 bool, symbol string) bool {
 	switch symbol {
 	case AND:
@@ -97,6 +119,7 @@ func getSum(cond1 bool, cond2 bool, symbol string) bool {
 	return false
 }
 
+// getPriority 获取操作符的优先级，用于决定是否需要计算。
 func getPriority(symbol string) int {
 	switch symbol {
 	case AND:
