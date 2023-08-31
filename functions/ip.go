@@ -8,7 +8,7 @@ import (
 	"github.com/astaxie/beego/logs"
 )
 
-//判断IP是否是本地的IP（IPV4和IPV6）
+// 判断IP是否是本地的IP（IPV4和IPV6）
 func IsLocalIP(ip string) (bool, error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
@@ -26,7 +26,7 @@ func IsLocalIP(ip string) (bool, error) {
 	return false, nil
 }
 
-// IsIntranet 判断是否是内网
+// IsIntranet 判断是否是内网，只支持ipv4
 func IsIntranet(ip string) bool {
 	if !checkIp(ip) {
 		return false
@@ -43,7 +43,7 @@ func IsIntranet(ip string) bool {
 		inputIpNum>>24 == innerIpF>>24
 }
 
-//检测ip的正确性
+// 检测ip的正确性
 func checkIp(ipStr string) bool {
 	address := net.ParseIP(ipStr)
 	if address == nil {
@@ -53,7 +53,7 @@ func checkIp(ipStr string) bool {
 	return true
 }
 
-// ip to int64
+// ip to int64,只支持ipv4
 func inetAton(ipStr string) int64 {
 	bits := strings.Split(ipStr, ".")
 	b0, _ := strconv.Atoi(bits[0])
