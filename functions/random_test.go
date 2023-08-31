@@ -5,28 +5,57 @@ import (
 	"testing"
 )
 
+// 结构体用于记录函数的所有输入和输出
+type TestInputOutput struct {
+	Input  int
+	Output string
+}
+
 func TestCreateRandomNumber(t *testing.T) {
-	a := CreateRandomNumber(3)
-	fmt.Println("CreateRandomNumbera:", a)
-	if len(a) != 3 {
-		t.Error("not 3")
+	testCases := []TestInputOutput{
+		{1, CreateRandomNumber(1)},   // 测试生成1位随机数字
+		{5, CreateRandomNumber(5)},   // 测试生成5位随机数字
+		{10, CreateRandomNumber(10)}, // 测试生成10位随机数字
 	}
-	b := CreateRandomNumber(3)
-	if a == b {
-		t.Error("not random")
+
+	for _, testCase := range testCases {
+		t.Run(fmt.Sprintf("Input: %d", testCase.Input), func(t *testing.T) {
+			result := CreateRandomNumber(testCase.Input)
+			if len(result) != testCase.Input {
+				t.Errorf("Expected length of %d, but got length of %d", testCase.Input, len(result))
+				return
+			}
+			if !IsNumeric(result) {
+				t.Errorf("result is not numeric, %s", result)
+				return
+			}
+			// 可以根据需要添加其他断言，确保生成的数字符合要求
+			if result == testCase.Output {
+				t.Errorf("Not Expected %s, but got %s", testCase.Output, result)
+				return
+			}
+		})
 	}
-	fmt.Println("CreateRandomNumberb:", b)
 }
 
 func TestCreateRandomString(t *testing.T) {
-	a := CreateRandomString(8)
-	fmt.Println("CreateRandomStringa:", a)
-	if len(a) != 8 {
-		t.Error("not 8")
+	testCases := []TestInputOutput{
+		{1, CreateRandomString(1)},   // 测试生成1位随机字符串
+		{5, CreateRandomString(5)},   // 测试生成5位随机字符串
+		{10, CreateRandomString(10)}, // 测试生成10位随机字符串
 	}
-	b := CreateRandomString(8)
-	if a == b {
-		t.Error("not random")
+
+	for _, testCase := range testCases {
+		t.Run(fmt.Sprintf("Input: %d", testCase.Input), func(t *testing.T) {
+			result := CreateRandomString(testCase.Input)
+			if len(result) != testCase.Input {
+				t.Errorf("Expected length of %d, but got length of %d", testCase.Input, len(result))
+			}
+			// 可以根据需要添加其他断言，确保生成的字符串符合要求
+			if result == testCase.Output {
+				t.Errorf("Not Expected %s, but got %s", testCase.Output, result)
+				return
+			}
+		})
 	}
-	fmt.Println("CreateRandomStringb:", b)
 }
