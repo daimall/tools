@@ -13,7 +13,7 @@ type TestInputOutput struct {
 
 func TestCreateRandomNumber(t *testing.T) {
 	testCases := []TestInputOutput{
-		{1, CreateRandomNumber(1)},   // 测试生成1位随机数字
+		{15, CreateRandomNumber(15)}, // 测试生成1位随机数字
 		{5, CreateRandomNumber(5)},   // 测试生成5位随机数字
 		{10, CreateRandomNumber(10)}, // 测试生成10位随机数字
 	}
@@ -40,7 +40,7 @@ func TestCreateRandomNumber(t *testing.T) {
 
 func TestCreateRandomString(t *testing.T) {
 	testCases := []TestInputOutput{
-		{1, CreateRandomString(1)},   // 测试生成1位随机字符串
+		{15, CreateRandomString(15)}, // 测试生成1位随机字符串
 		{5, CreateRandomString(5)},   // 测试生成5位随机字符串
 		{10, CreateRandomString(10)}, // 测试生成10位随机字符串
 	}
