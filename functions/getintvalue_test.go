@@ -1,33 +1,39 @@
 package functions
 
 import (
+	"errors"
 	"testing"
 )
 
 func TestGetIntV(t *testing.T) {
-	testCases := []struct {
-		Input       interface{}
-		ExpectedInt int
-		ExpectedErr bool
+	tests := []struct {
+		input interface{}
+		want  int
+		err   error
 	}{
-		{123, 123, false},         // 测试整数类型
-		{3.14, 3, false},          // 测试浮点数类型
-		{"456", 456, false},       // 测试字符串数字
-		{"abc", 0, true},          // 测试非数字字符串
-		{true, 0, true},           // 测试布尔值
-		{uint32(789), 789, false}, // 测试无符号整数类型
-		{int64(999), 999, false},  // 测试有符号整数类型
+		// Test cases covering different types
+		{int(42), 42, nil},                         // Test case for int input
+		{int8(42), 42, nil},                        // Test case for int8 input
+		{int16(42), 42, nil},                       // Test case for int16 input
+		{int32(42), 42, nil},                       // Test case for int32 input
+		{int64(42), 42, nil},                       // Test case for int64 input
+		{float32(42.5), 42, nil},                   // Test case for float32 input
+		{float64(42.5), 42, nil},                   // Test case for float64 input
+		{uint(42), 42, nil},                        // Test case for uint input
+		{uint8(42), 42, nil},                       // Test case for uint8 input
+		{uint16(42), 42, nil},                      // Test case for uint16 input
+		{uint32(42), 42, nil},                      // Test case for uint32 input
+		{uint64(42), 42, nil},                      // Test case for uint64 input
+		{"42", 42, nil},                            // Test case for string input
+		{"invalid", 0, errors.New("unknown type")}, // Test case for unknown string input
+
+		// Add more test cases here if needed
 	}
 
-	for _, testCase := range testCases {
-		t.Run("GetIntV", func(t *testing.T) {
-			result, err := GetIntV(testCase.Input)
-			if err != nil && !testCase.ExpectedErr {
-				t.Errorf("Unexpected error: %v", err)
-			}
-			if result != testCase.ExpectedInt {
-				t.Errorf("Expected %d, but got %d", testCase.ExpectedInt, result)
-			}
-		})
+	for _, test := range tests {
+		got, err := GetIntV(test.input)
+		if got != test.want || (err == nil && test.err != nil) || (err != nil && test.err == nil) {
+			t.Errorf("GetIntV(%v) = %v, %v, want %v, %v", test.input, got, err, test.want, test.err)
+		}
 	}
 }
